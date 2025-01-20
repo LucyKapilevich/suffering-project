@@ -1,8 +1,7 @@
-import json
 import os
+import json
 
-# New path
-in_path = "./People"
+in_path = "Python Group/People"
 os.chdir(in_path)
 
 artist_dict = {}
@@ -24,4 +23,15 @@ os.chdir(in_path)
 
 # Store artists in csv file
 with open('musician_data.csv', 'w', encoding='utf-8') as file:
-    file.write(str(artist_dict))
+    file.write('Name, Citizenship, Ethnicity, Birthyear, Deathyear, Deathcause, Height, Type, Genre\n')
+    for artist in artist_dict.values():
+        artist_data = (f"{artist.get('http://www.w3.org/2000/01/rdf-schema#label', '')},"
+                       f"{artist.get('ontology/citizenship_label', '')},"
+                       f"{artist.get('ontology/ethnicity_label', '')},"
+                       f"{artist.get('ontology/birthYear', '')},"
+                       f"{artist.get('ontology/deathYear', '')},"
+                       f"{artist.get('ontology/deathCause', '')},"
+                       f"{artist.get('ontology/height', '')},"
+                       f"{artist.get('ontology/background', '')},"
+                       f"{artist.get('ontology/background', '')}\n")
+        file.write(artist_data)
