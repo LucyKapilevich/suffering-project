@@ -1,5 +1,6 @@
 import os
 import json
+import csv
 
 in_path = "Python Group/People"
 os.chdir(in_path)
@@ -33,70 +34,103 @@ countries = [
     'Zambia', 'Zimbabwe'
 ]
 
-# Store artists in csv file
-with open('../history_data.csv', 'w', encoding='utf-8',) as file:
-    file.write('Name, Birthyear, Birthplace, Deathyear, Deathcause, awardNumber, Height, Religion, spouseNumber\n')
+people_list = list()
 
-    # Open all .json files from pathname
-    for filename in os.listdir():
-        if filename.endswith('.json'):
-            with open(filename, 'r') as jsonfile:
-                data = json.load(jsonfile)
-                for person in data:
+# Open all .json files from pathname
+for filename in os.listdir():
+    if filename.endswith('.json'):
+        with open(filename, 'r') as jsonfile:
+            data = json.load(jsonfile)
+            for person in data:
 
-                    # Check if death year exists
-                    deathyear = person.get('ontology/deathYear')
-                    if not deathyear:
-                        continue  # Skip this entry if death_year is None or empty
+                # Check if death year exists
+                deathyear = person.get('ontology/deathYear')
+                if not deathyear:
+                    continue  # Skip this entry if death_year is None or empty
 
-                    # Check if birth year exists
-                    birthyear = person.get('ontology/birthYear')
-                    if not birthyear:
-                        continue  # Skip this entry if death_year is None or empty
+                # Check if birth year exists
+                birthyear = person.get('ontology/birthYear')
+                if not birthyear:
+                    continue  # Skip this entry if death_year is None or empty
 
-                    # Clean birthplace
-                    birthplace_label = person.get('ontology/birthPlace_label')
-                    birthplace = 'NA'
-                    if birthplace_label:
-                        for place in birthplace_label:
-                            if place in countries:
-                                birthplace = place
-                                break
-                    
-                    # Clean award/award number
-                    award = person.get('ontology/award_label')
-                    if award == None:
-                        award_num = 'NA'  # Award is empty if no award
-                    else:
-                        award_num = len(award)
+                # Clean birthplace
+                birthplace_label = person.get('ontology/birthPlace_label')
+                birthplace = 'NA'
+                if birthplace_label:
+                    for place in birthplace_label:
+                        if place in countries:
+                            birthplace = place
+                            break
+                
+                # Clean award/award number
+                award = person.get('ontology/award_label')
+                if isinstance(award, list):
+                    award_num = len(award) # Skip this entry if death_year is None or empty
+                elif isinstance(award, str):
+                    award_num = 1
+                else:
+                    award_num = 0
+                
+                # Clean spouse/spouse number
+                spouse = person.get('ontology/spouse')
+                if isinstance(spouse, list):
+                    spouse_num = len(spouse) # Skip this entry if death_year is None or empty
+                elif isinstance(spouse, str):
+                    spouse_num = 1
+                else:
+                    spouse_num = 0
 
-                    # Clean spouse/spouse number
-                    spouse = person.get('ontology/spouse')
-                    if spouse == None:
-                        spouse_num = 'NA'  # Skip this entry if death_year is None or empty
-                    else:
-                        spouse_num = len(spouse)
+                gender = person.get('ontology/gender')
+                if gender == "http://dbpedia.org/resource/Female":
+                    gender = 'female'
+                elif gender == "http://dbpedia.org/resource/Male":
+                    gender = 'male'
+                else:
+                    gender = 'NA'
+                
+                # Write data to csv file
+                name = f"{person.get('http://www.w3.org/2000/01/rdf-schema#label')}"
+                birthyear = person.get('ontology/birthYear')
+                deathyear = person.get('ontology/deathYear')
+                deathcause = person.get('ontology/deathCause_label')
+                height = person.get('ontology/height')
+                religion = person.get('ontology/religion_label')
+                occupation = person.get('ontology/occupation_label')
 
-                    # Write data to csv file
-                    name = f"{person.get('http://www.w3.org/2000/01/rdf-schema#label')}"
-                    birthyear = person.get('ontology/birthYear')
-                    deathyear = person.get('ontology/deathYear')
-                    deathcause = person.get('ontology/deathCause_label')
-                    height = person.get('ontology/height')
-                    religion = person.get('ontology/religion_label')
-                    occupation = person.get('ontology/occupation_label')
+                # If there is more than one entry for birthyear or deathyear, skip this entry
+                if isinstance(deathyear, list):
+                    deathyear = deathyear[0]
+                if isinstance(birthyear, list):
+                    birthyear = birthyear[0]
+                if isinstance(religion, list):
+                    religion = religion[0]
+                if isinstance(deathcause, list):
+                    deathcause = deathcause[0]
+                if isinstance(occupation, list):
+                    occupation = occupation[1]
 
-                    # If there is more than one entry for birthyear or deathyear, skip this entry
-                    if isinstance(deathyear, list):
-                        deathyear = deathyear[0]
-                    if isinstance(birthyear, list):
-                        birthyear = birthyear[0]
-                    if isinstance(religion, list):
-                        religion = religion[0]
-                    if isinstance(deathcause, list):
-                        deathcause = deathcause[0]
-                    if isinstance(occupation, list):
-                        occupation = occupation[0]
+                person_dict = {}
 
-                    # Write data to csv file
-                    file.write((f"{name}, {int(birthyear)}, {birthplace}, {int(deathyear)}, {deathcause}, {award_num}, {height}, {religion}, {spouse_num}\n").replace('None', 'NA'))
+                # Write data to csv file
+                person_dict = {"Name":name,
+                               "Birth Year":int(birthyear),
+                               "Birth Place":birthplace,
+                               "Death Year":int(deathyear),
+                               "Death Cause":deathcause,
+                               "Award Number":award_num,
+                               "Religion":religion,
+                               "Spouse Number":spouse_num,
+                               "Height":height,
+                               "Occupation":occupation
+                               }
+                for key in person_dict:
+                    if person_dict[key] == None:
+                        person_dict[key] = 'NA'
+                people_list.append(person_dict)
+
+# Store data in csv file
+with open('../history_data.csv', 'w', encoding='utf-8', newline='') as file:
+    writer = csv.DictWriter(file, fieldnames=["Name", "Birth Year", "Birth Place", "Death Year", "Death Cause", "Award Number", "Religion", "Spouse Number", "Height", "Occupation"])
+    writer.writeheader()
+    for person in people_list:
+        writer.writerow(person)
