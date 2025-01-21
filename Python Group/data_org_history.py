@@ -106,8 +106,18 @@ for filename in os.listdir():
                     religion = religion[0]
                 if isinstance(deathcause, list):
                     deathcause = deathcause[0]
+
+                # Filter occupation
                 if isinstance(occupation, list):
-                    occupation = occupation[1]
+                    for occ in occupation:
+                        if not any(char in occ for char in '_:.,;-1234567890'):
+                            occupation = occ
+                            break
+                    else:
+                        occupation = 'NA'  # Default value if no valid occupation is found
+                elif isinstance(occupation, str):
+                    if any(char in occupation for char in '_:.,;-1234567890'):
+                        occupation = 'NA'
 
                 person_dict = {}
 
