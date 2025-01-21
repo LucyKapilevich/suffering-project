@@ -35,7 +35,7 @@ countries = [
 
 # Store artists in csv file
 with open('../history_data.csv', 'w', encoding='utf-8',) as file:
-    file.write('Name, Birthyear, Birthplace, Deathyear, Deathcause, Award, Height, Religion\n')
+    file.write('Name, Birthyear, Birthplace, Deathyear, Deathcause, awardNumber, Height, Religion, spouseNumber\n')
 
     # Open all .json files from pathname
     for filename in os.listdir():
@@ -43,9 +43,15 @@ with open('../history_data.csv', 'w', encoding='utf-8',) as file:
             with open(filename, 'r') as jsonfile:
                 data = json.load(jsonfile)
                 for person in data:
+
                     # Check if death year exists
-                    death_year = person.get('ontology/deathYear')
-                    if not death_year:
+                    deathyear = person.get('ontology/deathYear')
+                    if not deathyear:
+                        continue  # Skip this entry if death_year is None or empty
+
+                    # Check if birth year exists
+                    birthyear = person.get('ontology/birthYear')
+                    if not birthyear:
                         continue  # Skip this entry if death_year is None or empty
 
                     # Clean birthplace
@@ -57,19 +63,40 @@ with open('../history_data.csv', 'w', encoding='utf-8',) as file:
                                 birthplace = place
                                 break
                     
+                    # Clean award/award number
                     award = person.get('ontology/award_label')
-                    if not award:
-                        continue  # Skip this entry if death_year is None or empty
-                    award_num = len(award)
+                    if award == None:
+                        award_num = 'NA'  # Award is empty if no award
+                    else:
+                        award_num = len(award)
+
+                    # Clean spouse/spouse number
+                    spouse = person.get('ontology/spouse')
+                    if spouse == None:
+                        spouse_num = 'NA'  # Skip this entry if death_year is None or empty
+                    else:
+                        spouse_num = len(spouse)
 
                     # Write data to csv file
                     name = f"{person.get('http://www.w3.org/2000/01/rdf-schema#label')}"
-                    birthyear = f"{person.get('ontology/birthYear')}"
-                    birthplace = f"{birthplace}"
-                    deathyear = f"{person.get('ontology/deathYear')}"
-                    deathcause = f"{person.get('ontology/deathCause_label')}"
-                    award = f"{award_num}"
-                    height = f"{person.get('ontology/height')}"
-                    religion = f"{person.get('ontology/religion_label')}"
+                    birthyear = person.get('ontology/birthYear')
+                    deathyear = person.get('ontology/deathYear')
+                    deathcause = person.get('ontology/deathCause_label')
+                    height = person.get('ontology/height')
+                    religion = person.get('ontology/religion_label')
+                    occupation = person.get('ontology/occupation_label')
 
-                    file.write((f"{name}, {birthyear}, {birthplace}, {deathyear}, {deathcause}, {award}, {height}, {religion}\n").replace('None', 'NA'))
+                    # If there is more than one entry for birthyear or deathyear, skip this entry
+                    if isinstance(deathyear, list):
+                        deathyear = deathyear[0]
+                    if isinstance(birthyear, list):
+                        birthyear = birthyear[0]
+                    if isinstance(religion, list):
+                        religion = religion[0]
+                    if isinstance(deathcause, list):
+                        deathcause = deathcause[0]
+                    if isinstance(occupation, list):
+                        occupation = occupation[0]
+
+                    # Write data to csv file
+                    file.write((f"{name}, {int(birthyear)}, {birthplace}, {int(deathyear)}, {deathcause}, {award_num}, {height}, {religion}, {spouse_num}\n").replace('None', 'NA'))
