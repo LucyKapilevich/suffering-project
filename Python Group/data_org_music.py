@@ -75,9 +75,9 @@ with open('../musician_data.csv', 'w', encoding='utf-8',) as file:
 
                             # Write data to csv file
                             artist_data = (f"{person.get('http://www.w3.org/2000/01/rdf-schema#label')} ,"
-                                        f"{person.get('ontology/birthYear_label')} ,"
+                                        f"{person.get('ontology/birthYear')[0]} ,"
                                         f"{birthplace} ,"
-                                        f"{person.get('ontology/deathYear_label')} ,"
+                                        f"{person.get('ontology/deathYear')} ,"
                                         f"{person.get('ontology/award_label')} ,"
                                         f"{instrument} ,"
                                         f"{person.get('ontology/training_label')} ,"
@@ -85,5 +85,5 @@ with open('../musician_data.csv', 'w', encoding='utf-8',) as file:
                                         f"{person.get('ontology/field_label')} ,"
                                         f"{person.get('ontology/background')} ,"
                                         f"{band} ,"
-                                        f"{genre} \n")
+                                        f"{genre}\n")
                             file.write(artist_data)
