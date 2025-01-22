@@ -2,9 +2,11 @@ import os
 import json
 import csv
 
+# Rewrites path, change in_path if you want to change the directory to access your data
 in_path = "Python Group/People"
 os.chdir(in_path)
 
+# Makes all necessary dictionaries we'll use, add as needed
 occupation_dict = {}
 religion_dict = {}
 deathcause_dict = {}
@@ -19,11 +21,13 @@ for filename in os.listdir():
                 birthyear = person.get('ontology/birthYear')
                 deathyear = person.get('ontology/deathYear')
 
-                # If there is more than one entry for birthyear or deathyear, skip this entry
+                # If there is more than one entry for birthyear or deathyear, skip this entry, otherwise it causes a crash
                 if isinstance(deathyear, list):
                     continue
                 if isinstance(birthyear, list):
                     continue
+
+                # If entry doesn't exist, skip this entry, otherwise it causes a crash
                 if not deathyear:
                     continue
                 if not birthyear:
@@ -32,62 +36,64 @@ for filename in os.listdir():
                 try:
                     birthyear = int(birthyear)
                 except:
-                    TypeError
+                    TypeError # Makes sure it doesn't crash
                 try:
                     deathyear = int(deathyear)
                 except:
-                    TypeError
+                    TypeError # Makes sure it doesn't crash
 
+                # Takes out everyone born before 0 and after 1950
                 if birthyear > 1950:
                     continue
                 if birthyear < 0:
                     continue
 
-                # Write data to csv file
+                # Store all the variables for processing
                 deathcause = person.get('ontology/deathCause_label')
                 religion = person.get('ontology/religion_label')
                 occupation = person.get('ontology/occupation_label')
                 
+                # It's easier to store lifespan rather than deathyear or birthyear
                 lifespan = deathyear - birthyear
 
                 # Creates occupation dictionary to count all occupation entries
                 if isinstance(occupation, list):
                     for occ in occupation:
-                        if not any(char in occ for char in '_:.,;-1234567890'):
+                        if not any(char in occ for char in '_:.,;-1234567890'): # So artefacts don't enter our data
                             if occ not in occupation_dict:
-                                occupation_dict[occ] = {"Lifespan": []}
+                                occupation_dict[occ] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                             occupation_dict[occ]["Lifespan"].append(lifespan)
                 elif isinstance(occupation, str):
-                    if not any(char in occupation for char in '_:.,;-1234567890'):
+                    if not any(char in occupation for char in '_:.,;-1234567890'): # So artefacts don't enter our data
                         if occupation not in occupation_dict:
-                            occupation_dict[occupation] = {"Lifespan": []}
+                            occupation_dict[occupation] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                         occupation_dict[occupation]["Lifespan"].append(lifespan)
 
                 # Creates religion dictionary to count all religion entries
                 if isinstance(religion, list):
                     for rel in religion:
-                        if not any(char in rel for char in '_:.,;-1234567890'):
+                        if not any(char in rel for char in '_:.,;-1234567890'): # So artefacts don't enter our data
                             if rel not in religion_dict:
-                                religion_dict[rel] = {"Lifespan": []}
+                                religion_dict[rel] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                             religion_dict[rel]["Lifespan"].append(lifespan)
                 elif isinstance(religion, str):
-                    if not any(char in religion for char in '_:.,;-1234567890'):
+                    if not any(char in religion for char in '_:.,;-1234567890'): # So artefacts don't enter our data
                         if religion not in religion_dict:
-                            religion_dict[religion] = {"Lifespan": []}
+                            religion_dict[religion] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                         religion_dict[religion]["Lifespan"].append(lifespan)
                                 # Creates religion dictionary to count all religion entries
 
                 # Creates deathcause dictionary to count all deathcause entries
                 if isinstance(deathcause, list):
                     for rel in deathcause:
-                        if not any(char in rel for char in '_:.,;-1234567890'):
+                        if not any(char in rel for char in '_:.,;-1234567890'): # So artefacts don't enter our data
                             if rel not in deathcause_dict:
-                                deathcause_dict[rel] = {"Lifespan": []}
+                                deathcause_dict[rel] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                             deathcause_dict[rel]["Lifespan"].append(lifespan)
                 elif isinstance(deathcause, str):
-                    if not any(char in deathcause for char in '_:.,;-1234567890'):
+                    if not any(char in deathcause for char in '_:.,;-1234567890'): # So artefacts don't enter our data
                         if deathcause not in deathcause_dict:
-                            deathcause_dict[deathcause] = {"Lifespan": []}
+                            deathcause_dict[deathcause] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                         deathcause_dict[deathcause]["Lifespan"].append(lifespan)
 
 # Store occupation in csv file
