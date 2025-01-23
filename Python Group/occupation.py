@@ -97,22 +97,25 @@ for filename in os.listdir():
                         deathcause_dict[deathcause]["Lifespan"].append(lifespan)
 
 # Store occupation in csv file
-with open('../occupation_data.csv', 'w', encoding='utf-8', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=["Occupation", "Lifespans"])
-    writer.writeheader()
-    for occupation, data in occupation_dict.items():
-        writer.writerow({"Occupation": occupation, "Lifespans": data["Lifespan"]})
+def write_dict_to_csv(filename, dict_data, key_name):
+    max_lifespan_count = max(len(data["Lifespan"]) for data in dict_data.values())
+    fieldnames = [key_name] + [f"Lifespan_{i+1}" for i in range(max_lifespan_count)]
+    
+    with open(filename, 'w', encoding='utf-8', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        for key, data in dict_data.items():
+            row = {key_name: key}
+            row.update({f"Lifespan_{i+1}": lifespan for i, lifespan in enumerate(data["Lifespan"])})
+            for i in range(len(data["Lifespan"]), max_lifespan_count):
+                row[f"Lifespan_{i+1}"] = "NA"
+            writer.writerow(row)
+
+# Store occupation in csv file
+write_dict_to_csv('../occupation_data.csv', occupation_dict, "Occupation")
 
 # Store religion in csv file
-with open('../religion_data.csv', 'w', encoding='utf-8', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=["Occupation", "Lifespans"])
-    writer.writeheader()
-    for religion, data in religion_dict.items():
-        writer.writerow({"Occupation": religion, "Lifespans": data["Lifespan"]})
+write_dict_to_csv('../religion_data.csv', religion_dict, "Religion")
 
 # Store deathcause in csv file
-with open('../deathcause_data.csv', 'w', encoding='utf-8', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=["Occupation", "Lifespans"])
-    writer.writeheader()
-    for deathcause, data in deathcause_dict.items():
-        writer.writerow({"Occupation": deathcause, "Lifespans": data["Lifespan"]})
+write_dict_to_csv('../deathcause_data.csv', deathcause_dict, "DeathCause")
