@@ -9,7 +9,7 @@ os.chdir(in_path)
 # Don't remove this
 artist_dict = {}
 
-# Writes a huge list of countries why isn't there an easier solution aaaaaaaaaaaaa
+# Writes a huge list of countries why isn't there an easier solution (￣▽￣)
 countries = [
     'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda',
     'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
@@ -46,17 +46,6 @@ for filename in os.listdir():
             data = json.load(jsonfile)
             for person in data:
 
-                # Name all my variables so I don't have to write out all of them again aaaaaaaaaaaaa
-                name = f"{person.get('http://www.w3.org/2000/01/rdf-schema#label')}"
-                birthyear = person.get('ontology/birthYear')
-                deathyear = person.get('ontology/deathYear')
-                deathcause = person.get('ontology/deathCause_label')
-                height = person.get('ontology/height')
-                religion = person.get('ontology/religion_label')
-                occupation_unit = person.get('ontology/occupation_label') # Different
-                deathyear = person.get('ontology/deathYear')
-                birthyear = person.get('ontology/birthYear')
-
                 # Clean birthplace to make it specific to a country
                 birthplace_label = person.get('ontology/birthPlace_label')
                 birthplace = 'NA'
@@ -65,7 +54,7 @@ for filename in os.listdir():
                         if place in countries:
                             birthplace = place
                             break # Stop the for loop from sifting through all the countries, improves efficiency
-
+                
                 # Clean award/award number so the data is easier to sift through
                 award = person.get('ontology/award_label')
                 if isinstance(award, list):
@@ -84,6 +73,18 @@ for filename in os.listdir():
                 else:
                     spouse_num = 0
 
+                # Name all my variables so I don't have to write out all of them again aaaaaaaaaaaaa
+                name = f"{person.get('http://www.w3.org/2000/01/rdf-schema#label')}"
+                birthyear = person.get('ontology/birthYear')
+                deathyear = person.get('ontology/deathYear')
+                deathcause = person.get('ontology/deathCause_label')
+                height = person.get('ontology/height')
+                religion = person.get('ontology/religion_label')
+                occupation = person.get('ontology/occupation_label')
+                deathyear = person.get('ontology/deathYear')
+                birthyear = person.get('ontology/birthYear')
+
+
                 # If there is more than one entry for birthyear or deathyear, skip this entry
                 # I do this so we avoid any weird data entries without an exact date
                 if isinstance(deathyear, list):
@@ -100,33 +101,29 @@ for filename in os.listdir():
                 try:
                     birthyear = int(birthyear) # Turn birthyear into integers so it can be processed in R
                 except:
-                    TypeError # So it doesn't crash
+                    TypeError # So it doesn't crash (•́︵•̀)
                 try:
                     deathyear = int(deathyear) # Turn deathyear into integers so it can be processed in R
                 except:
-                    TypeError # So it doesn't crash
+                    TypeError # So it doesn't crash again hahaaa (T _ T)
 
-                occupation = list()
-
-                # Filter occupation
-                try:
-                    if isinstance(occupation_unit, list):
-                        for occ in occupation_unit:
-                            if not any(char in occ for char in '_:.,;-1234567890'):
-                                occupation.append()
-                        else:
-                            occupation = 'NA'  # Default value if no valid occupation is found
-                    elif isinstance(occupation, str):
-                        if any(char in occupation for char in '_:.,;-1234567890'):
-                            occupation.append()
-                except:
-                    TypeError
+                # Filter occupation so no artifacts are in the data (this took hours)
+                if isinstance(occupation, list):
+                    for occ in occupation:
+                        if not any(char in occ for char in '_:.,;-1234567890'):
+                            occupation = occ
+                            break
+                    else:
+                        occupation = 'NA'  # Default value if no valid occupation is found
+                elif isinstance(occupation, str):
+                    if any(char in occupation for char in '_:.,;-1234567890'):
+                        occupation = 'NA'
 
                 # Makes the dict available
                 person_dict = {}
 
                 # Write data to csv file so that I can print out each person later
-                # I put them all into one dictionary each to make it easier to insert each person per line
+                # I put them all into one dictionary each to make it easier to insert each person per line :D
                 person_dict = {"Name":name,
                                "Birth Year":birthyear,
                                "Birth Place":birthplace,
@@ -142,8 +139,14 @@ for filename in os.listdir():
                 # Rewrites all "None" entries to 'NA' for R analysis
                 for key in person_dict:
                     if person_dict[key] == None:
-                        person_dict[key] = 'NA'
-                people_list.append(person_dict) # Adds the dictionary to a larger list, so it can be written line by line into the .csv file
+                        person_dict[key] = 'NA' # Changes all None values to 'NA' so we don't need to replace them in R
+                
+                # Adds the dictionary to a larger list, so it can be written line by line into the .csv file
+                people_list.append(person_dict)
+
+# Change directory again :pp
+out_path = ".."
+os.chdir(out_path)
 
 # Store data in csv file
 with open('../history_data.csv', 'w', encoding='utf-8', newline='') as file:

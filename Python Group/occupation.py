@@ -101,6 +101,14 @@ for filename in os.listdir():
                             deathcause_dict[deathcause] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                         deathcause_dict[deathcause]["Lifespan"].append(lifespan)
 
+# Comment either out if you want top 30 or bottom 30
+filt_occupation_dict = dict(sorted(occupation_dict.items(), key=lambda item: len(item[1]["Lifespan"]), reverse=True)[:30]) # Occupation
+# filt_religion_dict = dict(sorted(religion_dict.items(), key=lambda item: len(item[1]["Lifespan"]))[:30]) # Religion
+
+# Rewrites path, change in_path if you want to change the directory to access your data
+out_path = ".."
+os.chdir(out_path)
+
 def write_dict_to_csv(filename, dict_data, key_name): # Defines a function to create a .csv file for each variable
     max_lifespan_count = max(len(data["Lifespan"]) for data in dict_data.values())
     fieldnames = [key_name] + [f"Lifespan_{i+1}" for i in range(max_lifespan_count)]
@@ -116,10 +124,7 @@ def write_dict_to_csv(filename, dict_data, key_name): # Defines a function to cr
             writer.writerow(row)
 
 # Store occupation in csv file
-write_dict_to_csv('../occupation_data.csv', occupation_dict, "Occupation")
+write_dict_to_csv('../R Group/occupation_data.csv', filt_occupation_dict, "Occupation")
 
-# Store religion in csv file
-write_dict_to_csv('../religion_data.csv', religion_dict, "Religion")
-
-# Store deathcause in csv file
-write_dict_to_csv('../deathcause_data.csv', deathcause_dict, "DeathCause")
+# # Store religion in csv file
+# write_dict_to_csv('../religion_data.csv', filt_religion_dict, "Religion")
