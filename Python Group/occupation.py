@@ -56,6 +56,11 @@ for filename in os.listdir():
                 # It's easier to store lifespan rather than deathyear or birthyear
                 lifespan = deathyear - birthyear
 
+                if lifespan < 0:
+                    continue
+                if lifespan > 123:
+                    continue
+
                 # Creates occupation dictionary to count all occupation entries
                 if isinstance(occupation, list):
                     for occ in occupation:
@@ -96,8 +101,7 @@ for filename in os.listdir():
                             deathcause_dict[deathcause] = {"Lifespan": []} # Creates new dictionary if it isn't already available
                         deathcause_dict[deathcause]["Lifespan"].append(lifespan)
 
-# Store occupation in csv file
-def write_dict_to_csv(filename, dict_data, key_name):
+def write_dict_to_csv(filename, dict_data, key_name): # Defines a function to create a .csv file for each variable
     max_lifespan_count = max(len(data["Lifespan"]) for data in dict_data.values())
     fieldnames = [key_name] + [f"Lifespan_{i+1}" for i in range(max_lifespan_count)]
     
